@@ -15,7 +15,7 @@ st.caption("Señales a %d días basadas en noticias y precios. Herramienta exper
 
 
 @st.cache_data(ttl=6 * 3600, show_spinner=False)
-def compute(_progress=None):
+def compute(version=3, _progress=None):
     return run(progress=_progress)
 
 
@@ -29,6 +29,11 @@ take_profit = st.sidebar.slider("Objetivo de beneficio", 5, 100, 20, format="%d%
 bar = st.progress(0.0, text="Cargando precios y noticias...")
 out = compute(lambda f, t: bar.progress(min(f, 1.0), text=t))
 bar.empty()
+if not isinstance(out, dict):
+    st.cache_data.clear()
+    st.error("Los archivos de la app no son de la misma versión: `pipeline.py` en GitHub es una versión antigua. "
+             "Sube de nuevo `pipeline.py` (y todos los archivos del zip) sustituyendo los anteriores y recarga esta página.")
+    st.stop()
 sig, stats, model, tl = out["sig"], out["stats"], out["model"], out["tl"]
 
 # ---- aviso global si hay alertas de venta en la cartera
