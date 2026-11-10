@@ -1,20 +1,26 @@
-# Señales bursátiles por noticias
+# Recomendaciones de compra y venta + cartera personal
 
-Relaciona el tono de las noticias (de la empresa, de su sector y macro) con los movimientos de precio de los últimos años y aplica lo aprendido a la actualidad.
+Panel que relaciona el tono de las noticias (de la empresa, su sector y macro) con los movimientos de precio de los últimos años y aplica lo aprendido a la actualidad.
 
-## Cómo funciona
-1. **Precios**: `yfinance` (3 años, ver `config.py`).
-2. **Noticias**: GDELT (gratuito). Series diarias de tono y volumen desde 2017 para cada tema: empresa, sector (chips, petróleo, tipos...) y macro.
-3. **Modelo**: gradient boosting que predice el retorno a 5 días con sentimiento directo/sector/macro, volumen de noticias, momentum y volatilidad.
-4. **Validación**: walk-forward (entrena con el pasado, prueba con el futuro).
-5. **Señal**: COMPRAR / VENDER / MANTENER según el retorno esperado, con los titulares recientes bajo demanda.
+## Pestañas
+- **Resumen**: mejores compras y ventas de todos los mercados.
+- **Mi cartera**: registra tus compras (ticker, fecha, importe). Calcula tu beneficio y muestra alertas de VENDER o VIGILAR con los motivos (modelo, noticias de la empresa, del sector o macro, límite de pérdida, objetivo de beneficio).
+- **EE. UU., España, Europa**: recomendaciones por mercado.
 
-## Despliegue online (sin instalar nada)
-1. Crea un repositorio en GitHub y sube estos archivos (botón "Add file > Upload files").
-2. Entra en share.streamlit.io con tu cuenta de GitHub > "Create app" > elige el repo y `app.py` > Deploy.
+## Archivos
+- `app.py`: el panel. `portfolio.py`: análisis de la cartera.
+- `config.py`: mercados y acciones. Para añadir una acción, copia una línea de `UNIVERSE`.
+- `pipeline.py`, `data.py`, `sentiment.py`: cálculo.
+
+## Cartera
+- Tu cartera no se guarda en el servidor. Descárgala en CSV y súbela la próxima vez.
+- Los alertas se calculan al pulsar "Analizar mi cartera"; la app no envía correos.
+- Para acciones que no están en el panel, el análisis tarda un poco más porque descarga sus noticias.
+
+## Despliegue
+Sube todos los archivos a tu repositorio de GitHub sobre los anteriores; Streamlit se actualiza solo.
 
 ## Limitaciones
-- No es asesoramiento financiero; un buen backtest no garantiza beneficios futuros.
-- El tono de GDELT es una medida general de las noticias, no específica de bolsa.
-- Sin comisiones ni gestión de riesgo.
-- Datos diarios: no sirve para operar intradía.
+- No es asesoramiento financiero. Un buen resultado histórico no garantiza beneficios futuros.
+- El tono de GDELT es una medida general de las noticias.
+- Sin comisiones ni conversión de divisas. Datos diarios.

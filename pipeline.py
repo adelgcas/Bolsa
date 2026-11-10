@@ -15,7 +15,8 @@ FEATS = ["sent_directo", "n_noticias", "sent_sector", "sent_macro", "ret1", "ret
 
 def all_queries():
     q = {tk: v[0] for tk, v in C.UNIVERSE.items()}
-    q.update({f"SEC_{s}": qq for s, qq in C.SECTOR_QUERIES.items()})
+    sectors = {v[1] for v in C.UNIVERSE.values()}
+    q.update({f"SEC_{s}": C.SECTOR_QUERIES[s] for s in sectors})
     q[MACRO_KEY] = C.MACRO_QUERY
     return q
 
@@ -27,7 +28,7 @@ def collect_timelines(years=C.YEARS_HISTORY, progress=None):
     for i, (key, query) in enumerate(queries.items()):
         out[key] = daily_tone_volume(key, query, start, end)
         if progress:
-            progress((i + 1) / len(queries), f"Noticias: {key}")
+            progress((i + 1) / len(queries), f"Noticias: {key} ({i + 1}/{len(queries)})")
     return out
 
 
@@ -45,17 +46,18 @@ def _series(tl, key, index):
     return sent.reindex(index, method="ffill").fillna(0.0), vsum.reindex(index, method="ffill").fillna(0.0)
 
 
-def build_features(prices, tl):
+def build_features(prices, tl, universe=None):
+    universe = universe or C.UNIVERSE
     rows, h = [], C.HORIZON_DAYS
     mac_s, _ = _series(tl, MACRO_KEY, prices.index)
-    for tk, (_, sector) in C.UNIVERSE.items():
-        if tk not in prices:
+    for tk, (_, sector, market, name) in universe.items():
+        if tk not in prices or prices[tk].dropna().empty:
             continue
         p = prices[tk]
         d_s, d_c = _series(tl, tk, prices.index)
         s_s, _ = _series(tl, f"SEC_{sector}", prices.index)
         rows.append(pd.DataFrame({
-            "ticker": tk,
+            "ticker": tk, "nombre": name, "mercado": market,
             "sent_directo": d_s, "n_noticias": d_c,
             "sent_sector": s_s, "sent_macro": mac_s,
             "ret1": p.pct_change(1), "ret5": p.pct_change(5), "ret20": p.pct_change(20),
@@ -90,17 +92,20 @@ def signals(df):
     last["retorno_esperado"] = m.predict(last[FEATS])
     last["senal"] = np.where(last["retorno_esperado"] > C.BUY_THRESHOLD, "COMPRAR",
                              np.where(last["retorno_esperado"] < C.SELL_THRESHOLD, "VENDER", "MANTENER"))
-    return last.sort_values("retorno_esperado", ascending=False)
+    sig = last.sort_values("retorno_esperado", ascending=False).rename_axis("fecha").reset_index()
+    return sig, m
 
 
 def run(progress=None):
     prices = get_prices(C.UNIVERSE.keys(), C.YEARS_HISTORY)
     tl = collect_timelines(progress=progress)
     feats = build_features(prices, tl)
-    return signals(feats), backtest(feats)
+    sig, model = signals(feats)
+    return {"sig": sig, "stats": backtest(feats), "model": model, "tl": tl}
 
 
 if __name__ == "__main__":
-    sig, stats = run()
-    print("Backtest:", stats)
-    print(sig[["ticker", "retorno_esperado", "senal", "sent_directo", "sent_sector", "sent_macro"]].to_string())
+    out = run()
+    sig = out["sig"]
+    print("Backtest:", out["stats"])
+    print(sig[["mercado", "ticker", "retorno_esperado", "senal"]].to_string())

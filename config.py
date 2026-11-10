@@ -1,19 +1,33 @@
-"""Configuración: universo de acciones y relaciones directas/indirectas con noticias."""
+"""Configuración: mercados, acciones y relaciones directas/indirectas con noticias.
 
-# ticker -> (consulta de noticias directas, sector)
+Para añadir o quitar acciones edita UNIVERSE (ticker de Yahoo Finance):
+    "TICKER": ("búsqueda de noticias en inglés", "sector", "mercado", "nombre a mostrar")
+"""
+
+MARKETS = ["EE. UU.", "España", "Europa"]
+
 UNIVERSE = {
-    "AAPL": ("Apple iPhone", "tecnologia"),
-    "MSFT": ("Microsoft", "tecnologia"),
-    "NVDA": ("Nvidia", "tecnologia"),
-    "GOOGL": ("Google Alphabet", "tecnologia"),
-    "AMZN": ("Amazon", "tecnologia"),
-    "TSLA": ("Tesla", "automocion"),
-    "XOM": ("Exxon Mobil", "energia"),
-    "CVX": ("Chevron", "energia"),
-    "JPM": ("JPMorgan", "banca"),
-    "BAC": ("Bank of America", "banca"),
-    "SAN": ("Banco Santander", "banca"),
-    "ITX.MC": ("Inditex", "consumo"),
+    # EE. UU.
+    "AAPL": ("Apple iPhone", "tecnologia", "EE. UU.", "Apple"),
+    "MSFT": ("Microsoft", "tecnologia", "EE. UU.", "Microsoft"),
+    "NVDA": ("Nvidia", "tecnologia", "EE. UU.", "Nvidia"),
+    "TSLA": ("Tesla", "automocion", "EE. UU.", "Tesla"),
+    "JPM": ("JPMorgan", "banca", "EE. UU.", "JPMorgan"),
+    "XOM": ("Exxon Mobil", "energia", "EE. UU.", "Exxon Mobil"),
+    # España
+    "SAN.MC": ("Banco Santander", "banca", "España", "Santander"),
+    "BBVA.MC": ("BBVA bank", "banca", "España", "BBVA"),
+    "ITX.MC": ("Inditex", "consumo", "España", "Inditex"),
+    "IBE.MC": ("Iberdrola", "utilities", "España", "Iberdrola"),
+    "TEF.MC": ("Telefonica", "telecom", "España", "Telefónica"),
+    "REP.MC": ("Repsol", "energia", "España", "Repsol"),
+    # Europa
+    "ASML.AS": ("ASML", "tecnologia", "Europa", "ASML"),
+    "SAP.DE": ("SAP software", "tecnologia", "Europa", "SAP"),
+    "MC.PA": ("LVMH", "consumo", "Europa", "LVMH"),
+    "SIE.DE": ("Siemens", "industria", "Europa", "Siemens"),
+    "NESN.SW": ("Nestle", "consumo", "Europa", "Nestlé"),
+    "SHEL.L": ("Shell oil", "energia", "Europa", "Shell"),
 }
 
 # sector -> consulta de noticias indirectas (cadena de suministro, regulación, materias primas...)
@@ -23,6 +37,9 @@ SECTOR_QUERIES = {
     "energia": "oil price OR OPEC OR natural gas",
     "banca": "interest rates OR bank regulation OR credit defaults",
     "consumo": "consumer spending OR retail sales OR inflation",
+    "utilities": "electricity prices OR renewable energy OR utility regulation",
+    "telecom": "telecom spectrum OR 5G OR broadband regulation",
+    "industria": "manufacturing PMI OR industrial production OR automation",
 }
 
 # noticias macro que afectan a todo el mercado
